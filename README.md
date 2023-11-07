@@ -5,7 +5,6 @@ Generate a file named, myfile with 128kbps of random data.
 > dd if=/dev/urandom bs=1024 count=128 of=myfile
 ```
 
-
 ## Preview file info
 > ls -lh
 
