@@ -1,5 +1,5 @@
 use std::env;
-use std::io::{self, Result, Read, Write, ErrorKind};
+use std::io::{self, ErrorKind, Read, Result, Write};
 
 // Define CHUNK_SIZE -> constant for our buffer => 16 kilobytes
 // const CHUNK_SIZE: usize = value in kilobytes;
