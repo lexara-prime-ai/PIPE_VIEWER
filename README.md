@@ -19,3 +19,13 @@ Generate a file named, myfile with 128kbps of random data.
 ```shell
 > cat myfile | target/release/pipeviewer > myfile2
 ```
+
+## Using the 'yes' utility to test broken pipe error handling
+```shell
+> yes | cargo run | head -n 1 > /dev/null
+```
+
+## Preview console output
+```shell
+> yes | cargo run | head -n 100000000 > /dev/null
+```
