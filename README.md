@@ -15,7 +15,7 @@ Generate a file named, myfile with 128kbps of random data.
 > cargo build
 ```
 
-## Cat a the file then pipe the bytes to pipe-viewer
+## Cat the file then pipe the bytes to pipe-viewer
 ```shell
 > cat myfile | target/release/pipeviewer > myfile2
 ```
