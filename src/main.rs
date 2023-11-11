@@ -1,6 +1,8 @@
 use clap::{App, Arg};
 use std::env;
-use std::io::{self, ErrorKind, Read, Result, Write};
+use std::fs::File;
+// Use BufReader & BufWriter -> to provide buffer behavior
+use std::io::{self, BufReader, BufWriter, ErrorKind, Read, Result, Write};
 
 // Define CHUNK_SIZE -> constant for our buffer => 16 kilobytes
 // const CHUNK_SIZE: usize = value in kilobytes;
@@ -19,8 +21,8 @@ fn main() -> Result<()> {
         )
         .arg(Arg::with_name("silent").short("s").long("silent"))
         .get_matches();
-    let _infile = matches.value_of("infile").unwrap_or_default();
-    let _outfile = matches.value_of("outfile").unwrap_or_default();
+    let infile = matches.value_of("infile").unwrap_or_default();
+    let outfile = matches.value_of("outfile").unwrap_or_default();
     // Create a new String in case there's an error -> unwrap_or(String...)
     // If the length is > 0, then environment variable is present and contains a value
     let silent = if matches.is_present("silent") {
@@ -28,13 +30,27 @@ fn main() -> Result<()> {
     } else {
         !env::var("PV_SILENT").unwrap_or_default().is_empty()
     };
+    // Create reader
+    let mut reader: Box<dyn Read> = if !infile.is_empty() {
+        Box::new(BufReader::new(File::open(infile)?))
+    } else {
+        Box::new(BufReader::new(io::stdin()))
+    };
+
+    // Create writer
+    let mut writer: Box<dyn Write> = if !outfile.is_empty() {
+        Box::new(BufWriter::new(File::create(outfile)?))
+    } else {
+        Box::new(BufWriter::new(io::stdout()))
+    };
+
     // Preview silent using the dbg! macro -> one step above println -> it takes any arbitrary expression
     // dbg!(infile, outfile, silent);
     let mut total_bytes = 0;
     // Create buffer
     let mut buffer = [0; CHUNK_SIZE];
     loop {
-        let num_read = match io::stdin().read(&mut buffer) {
+        let num_read = match reader.read(&mut buffer) {
             Ok(0) => break,
             Ok(bytes) => bytes,
             Err(_) => break,
@@ -46,7 +62,7 @@ fn main() -> Result<()> {
             eprint!("\rTotal bytes: {}", total_bytes);
         }
         // Return Error Result
-        if let Err(e) = io::stdout().write_all(&buffer[..num_read]) {
+        if let Err(e) = writer.write_all(&buffer[..num_read]) {
             if e.kind() == ErrorKind::BrokenPipe {
                 break;
             }
