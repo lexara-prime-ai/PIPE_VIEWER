@@ -1,3 +1,4 @@
+use clap::{App, Arg};
 use std::env;
 use std::io::{self, ErrorKind, Read, Result, Write};
 
@@ -6,11 +7,29 @@ use std::io::{self, ErrorKind, Read, Result, Write};
 const CHUNK_SIZE: usize = 16 * 1024;
 
 fn main() -> Result<()> {
+    // Create placeholder for commandline input arguments
+    let matches = App::new("pipe viewer")
+        .arg(Arg::with_name("infile").help("Read from a file instead of stdin"))
+        .arg(
+            Arg::with_name("outfile")
+                .short("o")
+                .long("outfile")
+                .takes_value(true)
+                .help("Write output to a file instead of stdout"),
+        )
+        .arg(Arg::with_name("silent").short("s").long("silent"))
+        .get_matches();
+    let _infile = matches.value_of("infile").unwrap_or_default();
+    let _outfile = matches.value_of("outfile").unwrap_or_default();
     // Create a new String in case there's an error -> unwrap_or(String...)
     // If the length is > 0, then environment variable is present and contains a value
-    let silent = !env::var("PV_SILENT").unwrap_or_default().is_empty();
+    let silent = if matches.is_present("silent") {
+        true
+    } else {
+        !env::var("PV_SILENT").unwrap_or_default().is_empty()
+    };
     // Preview silent using the dbg! macro -> one step above println -> it takes any arbitrary expression
-    // dbg!(silent);
+    // dbg!(infile, outfile, silent);
     let mut total_bytes = 0;
     // Create buffer
     let mut buffer = [0; CHUNK_SIZE];
