@@ -1,3 +1,5 @@
+mod timer;
+
 use crossbeam::channel::Receiver;
 use crossterm::{
     cursor, execute,
@@ -5,7 +7,8 @@ use crossterm::{
     terminal::{Clear, ClearType},
 };
 use std::io::{self, Result, Stderr, Write};
-use std::time::{Duration, Instant};
+use std::time::Instant;
+use timer::Timer;
 
 pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>) -> Result<()> {
     let mut total_bytes = 0;
@@ -51,7 +54,7 @@ fn output_progress(stderr: &mut Stderr, bytes: usize, elapsed: String, rate: f64
     let rate = style::style(format!(" [{:.0}b/s]", rate)).with(Color::Blue);
     // Cue all 'cross term' commands and execute them all at once
     #[allow(deprecated)]
-    let _ = execute!(
+        let _ = execute!(
         stderr,
         cursor::MoveToColumn(0),
         Clear(ClearType::CurrentLine),
@@ -80,35 +83,3 @@ impl TimeOutput for u64 {
     }
 }
 
-struct Timer {
-    last_instant: Instant,
-    delta: Duration,
-    period: Duration,
-    countdown: Duration,
-    ready: bool,
-}
-
-impl Timer {
-    fn new() -> Self {
-        let now = Instant::now();
-        Self {
-            last_instant: now,
-            delta: Duration::default(),          // Default value -> 0
-            period: Duration::from_millis(1000), // Timing 1s
-            countdown: Duration::default(),      // Default value -> 0
-            ready: true,                         // Set to true to get immediate progress output
-        }
-    }
-
-    fn update(&mut self) {
-        let now = Instant::now();
-        self.delta = now - self.last_instant;
-        self.last_instant = now;
-        // Decrement countdown
-        // Durations can't be  negative -> need to use checked_sub to return a Result
-        self.countdown = self.countdown.checked_sub(self.delta).unwrap_or_else(|| {
-            self.ready = true;
-            self.period
-        });
-    }
-}
