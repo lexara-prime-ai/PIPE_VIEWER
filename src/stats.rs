@@ -54,7 +54,7 @@ fn output_progress(stderr: &mut Stderr, bytes: usize, elapsed: String, rate: f64
     let rate = style::style(format!(" [{:.0}b/s]", rate)).with(Color::Blue);
     // Cue all 'cross term' commands and execute them all at once
     #[allow(deprecated)]
-        let _ = execute!(
+    let _ = execute!(
         stderr,
         cursor::MoveToColumn(0),
         Clear(ClearType::CurrentLine),
@@ -82,4 +82,3 @@ impl TimeOutput for u64 {
         format!("{}:{:02}:{:02}", hours, minutes, seconds)
     }
 }
-
