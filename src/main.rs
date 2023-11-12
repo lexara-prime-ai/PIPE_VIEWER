@@ -1,7 +1,7 @@
 // Use BufReader & BufWriter -> to provide buffer behavior
 use std::io::Result;
 // Can't use crate:: here because the binary & library are separate crates
-use pipeviewer::{args::Args, read, stats, write};
+use cli_pipeviewer::{args::Args, read, stats, write};
 // Arc -> Atomic Reference Counter
 // Mutex will be used to protect access to mutable data
 use crossbeam::channel::{bounded, unbounded};

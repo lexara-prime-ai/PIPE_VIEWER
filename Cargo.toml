@@ -1,5 +1,5 @@
 [package]
-name = "pipeviewer"
+name = "cli_pipeviewer"
 version = "0.1.0"
 authors = ["Irfan Ghat"]
 edition = "2021"
