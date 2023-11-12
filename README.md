@@ -95,3 +95,7 @@ cargo run -- yes.txt -o yes2.txt
 cargo run -- yes2.txt -- > yes3.txt
 ```
 
+## Piping output to head and redirect output to /dev/null
+```shell
+yes | cargo run -- | head -n 100000000 > /dev/null
+```
