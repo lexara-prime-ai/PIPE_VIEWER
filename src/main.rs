@@ -4,7 +4,7 @@ use std::io::Result;
 use pipeviewer::{args::Args, read, stats, write};
 // Arc -> Atomic Reference Counter
 // Mutex will be used to protect access to mutable data
-use std::sync::mpsc;
+use crossbeam::channel::{bounded, unbounded};
 // For spawning threads...
 use std::thread;
 
@@ -18,12 +18,14 @@ fn main() -> Result<()> {
     } = args;
 
     // Create communication channels
-    let (stats_tx, stats_rx) = mpsc::channel();
-    let (write_tx, write_rx) = mpsc::channel();
+    let (stats_tx, stats_rx) = unbounded();
+    // Set limit for the bounded channel to '1024'
+    // If the limit is exceeded, the 1025th attempt will block until something is taken off the other end
+    let (write_tx, write_rx) = bounded(1024);
 
     // Spawning a thread returns thread_handles
-    let read_handle = thread::spawn(move || read::read_loop(&infile, stats_tx));
-    let stats_handle = thread::spawn(move || stats::stats_loop(silent, stats_rx, write_tx));
+    let read_handle = thread::spawn(move || read::read_loop(&infile, stats_tx, write_tx));
+    let stats_handle = thread::spawn(move || stats::stats_loop(silent, stats_rx));
     let write_handle = thread::spawn(move || write::write_loop(&outfile, write_rx));
 
     // Join threads -> crash main thread if any threads crash
