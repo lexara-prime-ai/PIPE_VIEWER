@@ -13,7 +13,11 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>) -> Result<()> {
         // Update console output
         if !silent {
             // Use carriage return '\r' to return the cursor to beginning of the line
-            eprint!("\rTotal bytes: {} Time taken: {}", total_bytes, start.elapsed().as_secs());
+            eprint!(
+                "\rTotal bytes: {} Time taken: {}",
+                total_bytes,
+                start.elapsed().as_secs()
+            );
         }
         // Check if there's a need to quit, if so break out of the loop
         if num_bytes == 0 {
