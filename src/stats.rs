@@ -1,11 +1,17 @@
 use crossbeam::channel::Receiver;
-use std::io::Result;
+use crossterm::{
+    cursor, execute,
+    style::{self, Color, PrintStyledContent},
+    terminal::{Clear, ClearType},
+};
+use std::io::{self, Result, Stderr, Write};
 use std::time::{Duration, Instant};
 
 pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>) -> Result<()> {
     let mut total_bytes = 0;
     let start = Instant::now();
     let mut timer = Timer::new();
+    let mut stderr = io::stderr();
     loop {
         // Receive bytes/buffer from read thread
         let num_bytes = stats_rx.recv().unwrap();
@@ -19,12 +25,12 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>) -> Result<()> {
         if !silent && timer.ready {
             timer.ready = false;
             // Use carriage return '\r' to return the cursor to beginning of the line
-            eprint!(
-                "\rTotal bytes: {} Time taken: {} Bytes per sec: [{:.0}b/s]",
+            output_progress(
+                &mut stderr,
                 total_bytes,
                 // Implement custom trait
                 start.elapsed().as_secs().as_time(),
-                rate_per_second
+                rate_per_second,
             );
         }
         // Check if there's a need to quit, if so break out of the loop
@@ -36,6 +42,24 @@ pub fn stats_loop(silent: bool, stats_rx: Receiver<usize>) -> Result<()> {
         eprintln!();
     }
     Ok(())
+}
+
+fn output_progress(stderr: &mut Stderr, bytes: usize, elapsed: String, rate: f64) {
+    // Convert parameter to String
+    let bytes = style::style(format!("{} ", bytes)).with(Color::Red);
+    let elapsed = style::style(elapsed).with(Color::Green);
+    let rate = style::style(format!(" [{:.0}b/s]", rate)).with(Color::Blue);
+    // Cue all 'cross term' commands and execute them all at once
+    #[allow(deprecated)]
+    let _ = execute!(
+        stderr,
+        cursor::MoveToColumn(0),
+        Clear(ClearType::CurrentLine),
+        PrintStyledContent(bytes),
+        PrintStyledContent(elapsed),
+        PrintStyledContent(rate)
+    );
+    let _ = stderr.flush();
 }
 
 // Custom trait implementation for u64
