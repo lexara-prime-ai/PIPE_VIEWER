@@ -1,3 +1,8 @@
+//! The stats module contains the stats loop
+//!
+//! # Definitions
+//! stats_loop -> fn
+
 mod timer;
 
 use crossbeam::channel::Receiver;
@@ -65,12 +70,24 @@ fn output_progress(stderr: &mut Stderr, bytes: usize, elapsed: String, rate: f64
     let _ = stderr.flush();
 }
 
+/// The TimeOutput trait adds a `.as_time()` method to `u64`
+///
+/// # Example
+/// Example usage
+///
+/// ```rust
+/// use pipeviewer::stats::TimeOutput;
+/// assert_eq!(65_u64.as_time(), String::from("0:01:05"))
+/// ```
+
 // Custom trait implementation for u64
-trait TimeOutput {
+// Make public since documentation tests are ran outside of the library
+pub trait TimeOutput {
     fn as_time(&self) -> String;
 }
 
 impl TimeOutput for u64 {
+    /// Renders the u64 into a time string
     fn as_time(&self) -> String {
         // Divide by 3600 and mod i.e get Remainder by 3600
         // to get the amount of Hours and Minutes
