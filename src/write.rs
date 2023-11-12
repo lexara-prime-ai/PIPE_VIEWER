@@ -1,7 +1,7 @@
 use std::fs::File;
 // Use BufReader -> to provide buffer behavior
-use std::io::{self, BufWriter, ErrorKind, Result, Write};
 use crossbeam::channel::Receiver;
+use std::io::{self, BufWriter, ErrorKind, Result, Write};
 
 pub fn write_loop(outfile: &str, write_rx: Receiver<Vec<u8>>) -> Result<()> {
     // Create writer
