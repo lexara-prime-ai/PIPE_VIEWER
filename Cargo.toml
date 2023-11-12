@@ -1,9 +1,19 @@
 [package]
-name = "pipeviewer"
+name = "cli_pipeviewer"
 version = "0.1.0"
 authors = ["Irfan Ghat"]
 edition = "2021"
+description = "An educational version of the pv utility"
+homepage = "https://github.com/projectfinalaudio/PIPE_VIEWER"
+repository = "https://github.com/projectfinalaudio/PIPE_VIEWER"
+readme = "README.md"
+keywords = ["educational", "systems", "cli"]
+categories = ["command-line-utilities"]
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = "2.33.3"
+crossbeam = "0.7.3"
+crossterm = "0.14.2"
