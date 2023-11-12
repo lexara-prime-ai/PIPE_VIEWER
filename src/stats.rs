@@ -54,7 +54,7 @@ fn output_progress(stderr: &mut Stderr, bytes: usize, elapsed: String, rate: f64
     let rate = style::style(format!(" [{:.0}b/s]", rate)).with(Color::Blue);
     // Cue all 'cross term' commands and execute them all at once
     #[allow(deprecated)]
-    let _ = execute!(
+        let _ = execute!(
         stderr,
         cursor::MoveToColumn(0),
         Clear(ClearType::CurrentLine),
@@ -80,5 +80,26 @@ impl TimeOutput for u64 {
         // Format hours, minutes & seconds
         // Make sure minutes & seconds are 0 padded
         format!("{}:{:02}:{:02}", hours, minutes, seconds)
+    }
+}
+
+// Create inline sub-module -> test
+#[cfg(test)]
+mod tests {
+    // Since this is a sub module, use from super::TimeOutput trait
+    use super::TimeOutput;
+
+    #[test]
+    fn as_time_format() {
+        // This test checks if the TIME formatting is correct
+        let pairs = vec![
+            (5_u64, "0:00:05"), // 5s -> 0h 00m 05s
+            (60_u64, "0:01:00"), // 60s -> 0h 01m 00s
+            (154_u64, "0:02:34"), // 120s + 34s -> 0h 02m 34s
+            (3603_u64, "1:00:03"), // 3600s + 3s -> 1h 00m 3s
+        ];
+        for (input, output) in pairs {
+            assert_eq!(input.as_time().as_str(), output);
+        }
     }
 }
